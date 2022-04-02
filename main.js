@@ -8,19 +8,37 @@ let url;
 // api 호출 함수를 부른다
 
 const getNews = async () => {
-    let header = new Headers({
-        'x-api-key': 'YKJZl_zdGEuG32fp8PS8abauyu6RdGRgqpz0XqeqNUI'
-    });
+    try {
+        let header = new Headers({
+            'x-api-key': 'YKJZl_zdGEuG32fp8PS8abauyu6RdGRgqpz0XqeqNUI'
+        });
 
-    let response = await fetch(url, {
-        headers: header
-    });
-    let data = await response.json();
-    // console.log("this is data",data);
-    news = data.articles;
-    console.log(news);
+        let response = await fetch(url, {
+            headers: header
+        });
+        let data = await response.json();
 
-    render();
+        if (response.status == 200) {
+            if(data.total_hits == 0) {
+                throw new Error("검색된 결과값이 없습니다.");
+            }
+            // console.log("받은 데이터는",data);
+            news = data.articles;
+            console.log(news);
+            render();
+        } else {
+            throw new Error(data.message);
+        }
+        // console.log("this is data",data);
+
+        // console.log("response는",response);
+        // console.log("data는",data);
+
+    } catch (error) {
+        console.log("잡힌 에러는", error.message);
+        errorRender(error.message);
+    };
+
 };
 
 const getLatestNews = async () => {
@@ -74,6 +92,11 @@ const render = () => {
 
     document.getElementById("news-board").innerHTML = newsHTML;
 }
+
+const errorRender = (message) => {
+    let errorHTML = `<div class="alert alert-danger  text-center" role="alert">${message}</div>`
+    document.getElementById("news-board").innerHTML = errorHTML;
+};
 
 searchButton.addEventListener("click", getNewsByKeyword);
 getLatestNews();
